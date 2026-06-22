@@ -353,18 +353,84 @@
 
   @keyframes spin { to { transform: rotate(360deg); } }
 
+  /* --- Mobile Cards --- */
+  .mobile-cards { display: none; }
+
+  .meeting-card {
+    border: 1px solid #e0e0e0;
+    border-radius: 8px;
+    padding: 14px 16px;
+    margin-bottom: 10px;
+    background: #fff;
+    cursor: pointer;
+    transition: box-shadow 0.15s;
+  }
+
+  .meeting-card:active { box-shadow: 0 0 0 2px #1a3a6b33; }
+
+  .card-title {
+    font-weight: 600;
+    font-size: 15px;
+    color: #1a1a1a;
+    margin-bottom: 8px;
+  }
+
+  .card-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    align-items: center;
+    margin-bottom: 6px;
+  }
+
+  .card-day {
+    font-size: 13px;
+    color: #555;
+    font-weight: 500;
+  }
+
+  .card-time {
+    font-size: 13px;
+    color: #888;
+  }
+
+  .card-type {
+    font-size: 12px;
+    color: #666;
+    margin-top: 2px;
+  }
+
+  .card-details-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    margin-top: 8px;
+    padding: 5px 12px;
+    border: 1px solid #1a3a6b;
+    border-radius: 5px;
+    background: transparent;
+    color: #1a3a6b;
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+  }
+
   /* --- Responsive --- */
   @media (max-width: 700px) {
-    .container { padding: 16px 12px; }
-    .filter-card { padding: 16px; }
+    .container { padding: 14px 12px; }
+    .filter-card { padding: 14px 16px; }
     .filter-group { min-width: 100%; }
     .filter-actions { width: 100%; }
     .filter-actions .btn { flex: 1; }
-    .quick-btn { min-width: 0; }
-    table { font-size: 13px; }
-    thead th, tbody td { padding: 10px 12px; }
-    .modal { margin: 10px; }
-    td.title-cell { max-width: 160px; }
+    .quick-filters { gap: 8px; }
+    .quick-btn { min-width: 0; padding: 8px 12px; font-size: 13px; }
+    .results-bar { flex-direction: column; align-items: flex-start; gap: 6px; }
+    .table-wrap { display: none; }
+    .mobile-cards { display: block; }
+    .modal { margin: 8px; border-radius: 10px; }
+    .modal-header { padding: 16px 18px 12px; }
+    .modal-header h2 { font-size: 17px; }
+    .modal-body { padding: 16px 18px 20px; }
   }
 </style>
 </head>
@@ -434,6 +500,9 @@
       <tbody id="meetingBody"></tbody>
     </table>
   </div>
+
+  <!-- Mobile Card View -->
+  <div class="mobile-cards" id="mobileCards"></div>
 </div>
 
 <!-- Detail Modal -->
@@ -616,6 +685,7 @@ function sortAndRender() {
 
 function renderTable() {
   const tbody = document.getElementById('meetingBody');
+  const cards = document.getElementById('mobileCards');
 
   document.getElementById('resultCount').textContent =
     `Showing ${filteredMeetings.length} meeting${filteredMeetings.length !== 1 ? 's' : ''}`;
@@ -629,6 +699,25 @@ function renderTable() {
       <td class="type-text">${esc(m.type)}</td>
       <td><button class="details-btn" onclick="openModal(${i})"><svg viewBox="0 0 20 20"><circle cx="10" cy="10" r="9" fill="none" stroke="currentColor" stroke-width="1.5"/><text x="10" y="14.5" text-anchor="middle" font-size="12" font-weight="bold" fill="currentColor">i</text></svg>Details</button></td>
     </tr>
+  `).join('');
+
+  cards.innerHTML = filteredMeetings.map((m, i) => `
+    <div class="meeting-card" onclick="openModal(${i})">
+      <div class="card-title">${esc(m.title)}</div>
+      <div class="card-row">
+        ${townBadge(m.town)}
+        ${fellowshipBadge(m.fellowship)}
+      </div>
+      <div class="card-row">
+        ${m.day ? `<span class="card-day">${esc(m.day)}</span>` : ''}
+        ${m.time ? `<span class="card-time">${esc(m.time)}</span>` : ''}
+      </div>
+      ${m.type ? `<div class="card-type">${esc(m.type)}</div>` : ''}
+      <button class="card-details-btn" onclick="event.stopPropagation();openModal(${i})">
+        <svg viewBox="0 0 20 20" width="13" height="13"><circle cx="10" cy="10" r="9" fill="none" stroke="currentColor" stroke-width="1.5"/><text x="10" y="14.5" text-anchor="middle" font-size="12" font-weight="bold" fill="currentColor">i</text></svg>
+        Details
+      </button>
+    </div>
   `).join('');
 }
 
