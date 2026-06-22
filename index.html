@@ -1,0 +1,751 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Jews in Recovery - Meeting Directory</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    background: #fff;
+    color: #333;
+    line-height: 1.5;
+  }
+
+  .container {
+    max-width: 1140px;
+    margin: 0 auto;
+    padding: 24px 20px;
+  }
+
+  /* --- Filter Card --- */
+  .filter-card {
+    border: 1px solid #e0e0e0;
+    border-radius: 8px;
+    padding: 20px 24px;
+    margin-bottom: 24px;
+    background: #fff;
+  }
+
+  .filter-card-label {
+    font-size: 13px;
+    font-weight: 600;
+    color: #555;
+    margin-bottom: 12px;
+  }
+
+  .quick-filters {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-bottom: 20px;
+  }
+
+  .quick-btn {
+    flex: 1;
+    min-width: 150px;
+    padding: 10px 20px;
+    border: 1px solid #d0d5dd;
+    border-radius: 6px;
+    background: #fff;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: 500;
+    color: #333;
+    text-align: center;
+    transition: all 0.15s;
+  }
+
+  .quick-btn:hover { border-color: #1a3a6b; color: #1a3a6b; }
+  .quick-btn.active { background: #1a3a6b; color: #fff; border-color: #1a3a6b; }
+
+  .filter-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    align-items: flex-end;
+  }
+
+  .filter-group { flex: 1; min-width: 180px; }
+  .filter-group label {
+    display: block;
+    font-size: 13px;
+    font-weight: 600;
+    color: #555;
+    margin-bottom: 5px;
+  }
+
+  .filter-group select {
+    width: 100%;
+    padding: 9px 12px;
+    border: 1px solid #d0d5dd;
+    border-radius: 6px;
+    font-size: 14px;
+    background: #fff;
+    color: #333;
+    appearance: auto;
+  }
+
+  .filter-actions {
+    display: flex;
+    gap: 8px;
+    align-items: flex-end;
+    padding-bottom: 1px;
+  }
+
+  .btn {
+    padding: 9px 20px;
+    border: none;
+    border-radius: 6px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.15s;
+    white-space: nowrap;
+  }
+
+  .btn-primary { background: #1a3a6b; color: #fff; }
+  .btn-primary:hover { background: #152f57; }
+  .btn-outline { background: #fff; color: #555; border: 1px solid #d0d5dd; }
+  .btn-outline:hover { border-color: #999; }
+
+  /* --- Results bar --- */
+  .results-bar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-bottom: 8px;
+    padding: 0 2px;
+  }
+
+  .result-count {
+    font-size: 14px;
+    color: #555;
+    font-weight: 500;
+  }
+
+  .sort-controls {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 13px;
+    color: #555;
+  }
+
+  .sort-controls label { font-weight: 600; }
+
+  .sort-select {
+    padding: 5px 10px;
+    border: 1px solid #d0d5dd;
+    border-radius: 5px;
+    font-size: 13px;
+    background: #fff;
+    color: #333;
+  }
+
+  /* --- Table --- */
+  .table-wrap { overflow-x: auto; }
+
+  table {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0;
+    border: 1px solid #e0e0e0;
+    border-radius: 8px;
+    overflow: hidden;
+  }
+
+  thead th {
+    background: #f7f8fa;
+    padding: 12px 16px;
+    text-align: left;
+    font-size: 12px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.4px;
+    color: #666;
+    border-bottom: 1px solid #e0e0e0;
+    cursor: pointer;
+    user-select: none;
+    white-space: nowrap;
+  }
+
+  thead th:hover { color: #1a3a6b; }
+
+  tbody tr {
+    border-bottom: 1px solid #f0f0f0;
+    transition: background 0.1s;
+  }
+
+  tbody tr:hover { background: #f9fafb; }
+  tbody tr:last-child td { border-bottom: none; }
+
+  tbody td {
+    padding: 12px 16px;
+    font-size: 14px;
+    vertical-align: middle;
+    border-bottom: 1px solid #f0f0f0;
+  }
+
+  td.title-cell {
+    font-weight: 600;
+    color: #1a1a1a;
+    max-width: 280px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  /* --- Badges --- */
+  .badge {
+    display: inline-block;
+    padding: 3px 10px;
+    border-radius: 12px;
+    font-size: 12px;
+    font-weight: 600;
+    white-space: nowrap;
+  }
+
+  /* Town colors */
+  .town-badge { padding: 3px 10px; border-radius: 12px; font-size: 12px; font-weight: 600; display: inline-block; }
+  .town-israel { background: #dbeafe; color: #1e40af; }
+  .town-monsey { background: #fce7f3; color: #9d174d; }
+  .town-brooklyn { background: #dbeafe; color: #1e3a5f; }
+  .town-lakewood { background: #dcfce7; color: #166534; }
+  .town-online { background: #e0e7ff; color: #3730a3; }
+  .town-williamsburg { background: #fef3c7; color: #92400e; }
+  .town-chicago { background: #d1fae5; color: #065f46; }
+  .town-five-towns { background: #fce7f3; color: #831843; }
+  .town-new-jersey { background: #fee2e2; color: #991b1b; }
+  .town-florida { background: #fef3c7; color: #78350f; }
+  .town-houston { background: #e0e7ff; color: #3730a3; }
+  .town-crown-heights { background: #dbeafe; color: #1e40af; }
+  .town-default { background: #f3f4f6; color: #374151; }
+
+  /* Fellowship colors */
+  .fellowship-badge { padding: 3px 10px; border-radius: 12px; font-size: 12px; font-weight: 600; display: inline-block; }
+  .fell-sa { background: #fee2e2; color: #991b1b; }
+  .fell-aa { background: #dbeafe; color: #1e40af; }
+  .fell-na { background: #e0e7ff; color: #3730a3; }
+  .fell-ga { background: #fef3c7; color: #92400e; }
+  .fell-alanon { background: #dcfce7; color: #166534; }
+  .fell-aca { background: #fce7f3; color: #9d174d; }
+  .fell-tlr { background: #dbeafe; color: #1e3a5f; }
+  .fell-recovery { background: #f3e8ff; color: #6b21a8; }
+  .fell-sanon { background: #fef3c7; color: #78350f; }
+  .fell-ma { background: #e0e7ff; color: #312e81; }
+  .fell-saa { background: #fee2e2; color: #7f1d1d; }
+  .fell-alateen { background: #ccfbf1; color: #115e59; }
+  .fell-default { background: #f3f4f6; color: #374151; }
+
+  /* Type badges */
+  .type-text { font-size: 13px; color: #555; }
+
+  /* --- Details Button --- */
+  .details-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    padding: 6px 14px;
+    border: 1px solid #1a3a6b;
+    border-radius: 6px;
+    background: transparent;
+    color: #1a3a6b;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.15s;
+    white-space: nowrap;
+  }
+
+  .details-btn:hover { background: #1a3a6b; color: #fff; }
+
+  .details-btn svg {
+    width: 14px;
+    height: 14px;
+    fill: currentColor;
+  }
+
+  /* --- Modal --- */
+  .modal-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.45);
+    z-index: 1000;
+    justify-content: center;
+    align-items: center;
+    padding: 20px;
+  }
+
+  .modal-overlay.open { display: flex; }
+
+  .modal {
+    background: #fff;
+    border-radius: 12px;
+    max-width: 540px;
+    width: 100%;
+    max-height: 85vh;
+    overflow-y: auto;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.2);
+    animation: modalIn 0.2s ease;
+  }
+
+  @keyframes modalIn {
+    from { opacity: 0; transform: translateY(16px) scale(0.98); }
+    to { opacity: 1; transform: translateY(0) scale(1); }
+  }
+
+  .modal-header {
+    padding: 22px 24px 16px;
+    border-bottom: 1px solid #eee;
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+  }
+
+  .modal-header h2 { font-size: 19px; color: #1a1a1a; padding-right: 16px; line-height: 1.3; }
+
+  .modal-close {
+    background: none;
+    border: none;
+    font-size: 26px;
+    cursor: pointer;
+    color: #999;
+    line-height: 1;
+    padding: 2px 6px;
+    border-radius: 4px;
+    transition: background 0.15s;
+  }
+
+  .modal-close:hover { background: #f3f4f6; color: #333; }
+
+  .modal-body { padding: 20px 24px 26px; }
+
+  .modal-field { margin-bottom: 16px; }
+  .modal-field:last-child { margin-bottom: 0; }
+  .modal-label { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; color: #999; margin-bottom: 4px; }
+  .modal-value { font-size: 15px; color: #333; line-height: 1.5; }
+  .modal-value a { color: #1a3a6b; text-decoration: none; font-weight: 500; }
+  .modal-value a:hover { text-decoration: underline; }
+
+  /* --- Loading --- */
+  .loading {
+    text-align: center;
+    padding: 60px 20px;
+    color: #888;
+    font-size: 15px;
+  }
+
+  .spinner {
+    width: 32px;
+    height: 32px;
+    border: 3px solid #e5e7eb;
+    border-top-color: #1a3a6b;
+    border-radius: 50%;
+    animation: spin 0.7s linear infinite;
+    margin: 0 auto 14px;
+  }
+
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  /* --- Responsive --- */
+  @media (max-width: 700px) {
+    .container { padding: 16px 12px; }
+    .filter-card { padding: 16px; }
+    .filter-group { min-width: 100%; }
+    .filter-actions { width: 100%; }
+    .filter-actions .btn { flex: 1; }
+    .quick-btn { min-width: 0; }
+    table { font-size: 13px; }
+    thead th, tbody td { padding: 10px 12px; }
+    .modal { margin: 10px; }
+    td.title-cell { max-width: 160px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="container">
+  <!-- Filter Card -->
+  <div class="filter-card">
+    <div class="filter-card-label">Quick Filters</div>
+    <div class="quick-filters">
+      <button class="quick-btn" data-town="Lakewood">Lakewood Area</button>
+      <button class="quick-btn" data-town="Brooklyn">Brooklyn</button>
+      <button class="quick-btn" data-town="Monsey">Monsey Area</button>
+    </div>
+
+    <div class="filter-row">
+      <div class="filter-group">
+        <label>Town</label>
+        <select id="filterTown"><option value="">All Towns</option></select>
+      </div>
+      <div class="filter-group">
+        <label>Fellowship</label>
+        <select id="filterFellowship"><option value="">All Fellowships</option></select>
+      </div>
+      <div class="filter-group">
+        <label>Day of Week</label>
+        <select id="filterDay"><option value="">All Days</option></select>
+      </div>
+      <div class="filter-actions">
+        <button class="btn btn-primary" onclick="applyFilters()">Apply Filters</button>
+        <button class="btn btn-outline" onclick="clearFilters()">Clear Filters</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Results Bar -->
+  <div class="results-bar">
+    <span class="result-count" id="resultCount">Loading...</span>
+    <div class="sort-controls">
+      <label>Sort by:</label>
+      <select class="sort-select" id="sortSelect">
+        <option value="day">Day of Week</option>
+        <option value="town">Town</option>
+        <option value="fellowship">Fellowship</option>
+        <option value="title">Title</option>
+      </select>
+    </div>
+  </div>
+
+  <!-- Table -->
+  <div class="table-wrap">
+    <div class="loading" id="loading">
+      <div class="spinner"></div>
+      Loading meetings...
+    </div>
+    <table id="meetingTable" style="display:none">
+      <thead>
+        <tr>
+          <th data-sort="title">TITLE</th>
+          <th data-sort="town">TOWN</th>
+          <th data-sort="fellowship">FELLOWSHIP</th>
+          <th data-sort="day">DAY &#x2193;</th>
+          <th data-sort="type">TYPE</th>
+          <th>DETAILS</th>
+        </tr>
+      </thead>
+      <tbody id="meetingBody"></tbody>
+    </table>
+  </div>
+</div>
+
+<!-- Detail Modal -->
+<div class="modal-overlay" id="modalOverlay">
+  <div class="modal">
+    <div class="modal-header">
+      <h2 id="modalTitle"></h2>
+      <button class="modal-close" onclick="closeModal()">&times;</button>
+    </div>
+    <div class="modal-body" id="modalBody"></div>
+  </div>
+</div>
+
+<script>
+const SHEET_ID = '1y8RXDyQPivRd9asvYtItHU-bx4Q7aIefP5it7hU0R8Q';
+const SHEET_URL = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq`;
+
+let allMeetings = [];
+let filteredMeetings = [];
+let currentSort = 'day';
+let sortAsc = true;
+
+const DAY_ORDER = { '': 99, 'Sunday': 0, 'Monday': 1, 'Tuesday': 2, 'Wednesday': 3, 'Thursday': 4, 'Friday': 5, 'Saturday': 6 };
+
+const TOWN_CLASSES = {
+  'israel': 'town-israel',
+  'monsey': 'town-monsey',
+  'brooklyn': 'town-brooklyn',
+  'lakewood towns': 'town-lakewood',
+  'lakewood': 'town-lakewood',
+  'online': 'town-online',
+  'williamsburg': 'town-williamsburg',
+  'chicago': 'town-chicago',
+  'five towns': 'town-five-towns',
+  'new jersey': 'town-new-jersey',
+  'florida': 'town-florida',
+  'houston, tx': 'town-houston',
+  'houston': 'town-houston',
+  'crown heights': 'town-crown-heights',
+};
+
+const FELLOWSHIP_CLASSES = {
+  'sa': 'fell-sa',
+  'aa': 'fell-aa',
+  'na': 'fell-na',
+  'ga': 'fell-ga',
+  'al-anon': 'fell-alanon',
+  'al-anon jewish': 'fell-alanon',
+  'aca': 'fell-aca',
+  'tlr': 'fell-tlr',
+  'recovery': 'fell-recovery',
+  's-anon': 'fell-sanon',
+  'ma': 'fell-ma',
+  'saa': 'fell-saa',
+  'alateen': 'fell-alateen',
+  'aa / na': 'fell-aa',
+};
+
+function handleSheetData(json) {
+  try {
+    allMeetings = json.table.rows.map(row => {
+      const c = row.c || [];
+      const val = i => {
+        if (!c[i]) return '';
+        if (c[i].f) return String(c[i].f).trim();
+        if (c[i].v != null) return String(c[i].v).trim();
+        return '';
+      };
+      return {
+        title: val(0),
+        town: val(1),
+        fellowship: val(2),
+        day: val(3),
+        time: val(4),
+        type: val(5),
+        address: val(6),
+        link: val(7),
+        contact: val(8),
+        notes: val(9)
+      };
+    }).filter(m => m.title);
+
+    populateDropdowns();
+    filteredMeetings = [...allMeetings];
+    sortAndRender();
+
+    document.getElementById('loading').style.display = 'none';
+    document.getElementById('meetingTable').style.display = '';
+  } catch (err) {
+    document.getElementById('loading').innerHTML =
+      '<div style="color:#c00">Failed to load meetings. Please refresh or try again later.</div>';
+    console.error('Sheet load error:', err);
+  }
+}
+
+function loadMeetings() {
+  window.google = window.google || {};
+  window.google.visualization = window.google.visualization || {};
+  window.google.visualization.Query = window.google.visualization.Query || {};
+  window.google.visualization.Query.setResponse = handleSheetData;
+
+  const script = document.createElement('script');
+  script.src = SHEET_URL;
+  script.onerror = function() {
+    document.getElementById('loading').innerHTML =
+      '<div style="color:#c00">Failed to load meetings. Please refresh or try again later.</div>';
+  };
+  document.head.appendChild(script);
+}
+
+function populateDropdowns() {
+  const towns = [...new Set(allMeetings.map(m => m.town).filter(Boolean))].sort();
+  const fellowships = [...new Set(allMeetings.map(m => m.fellowship).filter(Boolean))].sort();
+  const days = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday']
+    .filter(d => allMeetings.some(m => m.day === d));
+
+  fillSelect('filterTown', towns, 'All Towns');
+  fillSelect('filterFellowship', fellowships, 'All Fellowships');
+  fillSelect('filterDay', days, 'All Days');
+}
+
+function fillSelect(id, items, placeholder) {
+  const sel = document.getElementById(id);
+  sel.innerHTML = `<option value="">${placeholder}</option>` +
+    items.map(i => `<option value="${esc(i)}">${esc(i)}</option>`).join('');
+}
+
+function applyFilters() {
+  const town = document.getElementById('filterTown').value;
+  const fellowship = document.getElementById('filterFellowship').value;
+  const day = document.getElementById('filterDay').value;
+
+  filteredMeetings = allMeetings.filter(m => {
+    if (town && !m.town.toLowerCase().includes(town.toLowerCase())) return false;
+    if (fellowship && m.fellowship !== fellowship) return false;
+    if (day && m.day !== day) return false;
+    return true;
+  });
+
+  sortAndRender();
+}
+
+function clearFilters() {
+  document.getElementById('filterTown').value = '';
+  document.getElementById('filterFellowship').value = '';
+  document.getElementById('filterDay').value = '';
+  document.querySelectorAll('.quick-btn').forEach(b => b.classList.remove('active'));
+  filteredMeetings = [...allMeetings];
+  sortAndRender();
+}
+
+function sortAndRender() {
+  filteredMeetings.sort((a, b) => {
+    let va, vb;
+    if (currentSort === 'day') {
+      va = DAY_ORDER[a.day] ?? 99;
+      vb = DAY_ORDER[b.day] ?? 99;
+    } else {
+      va = (a[currentSort] || '').toLowerCase();
+      vb = (b[currentSort] || '').toLowerCase();
+    }
+    if (va < vb) return sortAsc ? -1 : 1;
+    if (va > vb) return sortAsc ? 1 : -1;
+    return 0;
+  });
+
+  // Update header arrows
+  document.querySelectorAll('thead th[data-sort]').forEach(th => {
+    const base = th.dataset.sort === 'title' ? 'TITLE' :
+                 th.dataset.sort === 'town' ? 'TOWN' :
+                 th.dataset.sort === 'fellowship' ? 'FELLOWSHIP' :
+                 th.dataset.sort === 'day' ? 'DAY' : 'TYPE';
+    th.innerHTML = th.dataset.sort === currentSort
+      ? `${base} ${sortAsc ? '&#x2193;' : '&#x2191;'}`
+      : base;
+  });
+
+  renderTable();
+}
+
+function renderTable() {
+  const tbody = document.getElementById('meetingBody');
+
+  document.getElementById('resultCount').textContent =
+    `Showing ${filteredMeetings.length} meeting${filteredMeetings.length !== 1 ? 's' : ''}`;
+
+  tbody.innerHTML = filteredMeetings.map((m, i) => `
+    <tr>
+      <td class="title-cell">${esc(m.title)}</td>
+      <td>${townBadge(m.town)}</td>
+      <td>${fellowshipBadge(m.fellowship)}</td>
+      <td>${esc(m.day)}</td>
+      <td class="type-text">${esc(m.type)}</td>
+      <td><button class="details-btn" onclick="openModal(${i})"><svg viewBox="0 0 20 20"><circle cx="10" cy="10" r="9" fill="none" stroke="currentColor" stroke-width="1.5"/><text x="10" y="14.5" text-anchor="middle" font-size="12" font-weight="bold" fill="currentColor">i</text></svg>Details</button></td>
+    </tr>
+  `).join('');
+}
+
+function townBadge(town) {
+  if (!town) return '';
+  const cls = TOWN_CLASSES[town.toLowerCase()] || 'town-default';
+  return `<span class="town-badge ${cls}">${esc(town)}</span>`;
+}
+
+function fellowshipBadge(fellowship) {
+  if (!fellowship) return '';
+  const cls = FELLOWSHIP_CLASSES[fellowship.toLowerCase()] || 'fell-default';
+  return `<span class="fellowship-badge ${cls}">${esc(fellowship)}</span>`;
+}
+
+function openModal(index) {
+  const m = filteredMeetings[index];
+  document.getElementById('modalTitle').textContent = m.title;
+
+  let html = '';
+
+  const field = (label, value) => {
+    if (!value) return '';
+    return `<div class="modal-field"><div class="modal-label">${label}</div><div class="modal-value">${value}</div></div>`;
+  };
+
+  html += field('Town', esc(m.town));
+  html += field('Fellowship', esc(m.fellowship));
+  html += field('Day', esc(m.day));
+  html += field('Time', esc(m.time));
+  html += field('Meeting Type', esc(m.type));
+
+  if (m.address) {
+    const mapLink = `https://maps.google.com/?q=${encodeURIComponent(m.address)}`;
+    html += field('Address', `<a href="${mapLink}" target="_blank" rel="noopener">${esc(m.address)}</a>`);
+  }
+
+  if (m.link) {
+    const href = m.link.startsWith('http') ? m.link : 'https://' + m.link;
+    html += field('Meeting Link', `<a href="${esc(href)}" target="_blank" rel="noopener">${esc(m.link)}</a>`);
+  }
+
+  if (m.contact) {
+    let contactHtml = esc(m.contact);
+    if (/^\d[\d\s()\-]+$/.test(m.contact.trim())) {
+      contactHtml = `<a href="tel:${m.contact.replace(/\D/g,'')}">${esc(m.contact)}</a>`;
+    } else if (m.contact.includes('@')) {
+      contactHtml = `<a href="mailto:${esc(m.contact)}">${esc(m.contact)}</a>`;
+    }
+    html += field('Contact', contactHtml);
+  }
+
+  html += field('Notes', esc(m.notes));
+
+  document.getElementById('modalBody').innerHTML = html;
+  document.getElementById('modalOverlay').classList.add('open');
+}
+
+function closeModal() {
+  document.getElementById('modalOverlay').classList.remove('open');
+}
+
+function esc(str) {
+  if (!str) return '';
+  const d = document.createElement('div');
+  d.textContent = str;
+  return d.innerHTML;
+}
+
+// Quick filter buttons
+document.querySelectorAll('.quick-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    const isActive = btn.classList.contains('active');
+    document.querySelectorAll('.quick-btn').forEach(b => b.classList.remove('active'));
+
+    if (isActive) {
+      document.getElementById('filterTown').value = '';
+    } else {
+      btn.classList.add('active');
+      document.getElementById('filterTown').value = btn.dataset.town;
+    }
+    applyFilters();
+  });
+});
+
+// Sort dropdown
+document.getElementById('sortSelect').addEventListener('change', function() {
+  currentSort = this.value;
+  sortAsc = true;
+  sortAndRender();
+});
+
+// Sort by clicking table headers
+document.querySelectorAll('thead th[data-sort]').forEach(th => {
+  th.addEventListener('click', () => {
+    const sort = th.dataset.sort;
+    if (currentSort === sort) {
+      sortAsc = !sortAsc;
+    } else {
+      currentSort = sort;
+      sortAsc = true;
+    }
+    document.getElementById('sortSelect').value = sort;
+    sortAndRender();
+  });
+});
+
+// Close modal
+document.getElementById('modalOverlay').addEventListener('click', e => {
+  if (e.target === e.currentTarget) closeModal();
+});
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape') closeModal();
+});
+
+// Load
+loadMeetings();
+</script>
+</body>
+</html>
