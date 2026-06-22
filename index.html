@@ -213,7 +213,6 @@
     white-space: nowrap;
   }
 
-  /* Town colors */
   .town-badge { padding: 3px 10px; border-radius: 12px; font-size: 12px; font-weight: 600; display: inline-block; }
   .town-israel { background: #dbeafe; color: #1e40af; }
   .town-monsey { background: #fce7f3; color: #9d174d; }
@@ -229,7 +228,6 @@
   .town-crown-heights { background: #dbeafe; color: #1e40af; }
   .town-default { background: #f3f4f6; color: #374151; }
 
-  /* Fellowship colors */
   .fellowship-badge { padding: 3px 10px; border-radius: 12px; font-size: 12px; font-weight: 600; display: inline-block; }
   .fell-sa { background: #fee2e2; color: #991b1b; }
   .fell-aa { background: #dbeafe; color: #1e40af; }
@@ -245,7 +243,6 @@
   .fell-alateen { background: #ccfbf1; color: #115e59; }
   .fell-default { background: #f3f4f6; color: #374151; }
 
-  /* Type badges */
   .type-text { font-size: 13px; color: #555; }
 
   /* --- Details Button --- */
@@ -335,8 +332,29 @@
 
   .modal-close:hover { background: #f3f4f6; color: #333; }
 
+  .modal-footer {
+    padding: 14px 24px;
+    border-top: 1px solid #eee;
+    flex-shrink: 0;
+    text-align: right;
+  }
+
+  .modal-close-btn {
+    padding: 8px 24px;
+    border: 1px solid #1a3a6b;
+    border-radius: 6px;
+    background: #1a3a6b;
+    color: #fff;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+
+  .modal-close-btn:hover { background: #152f57; }
+
   .modal-body {
-    padding: 20px 24px 26px;
+    padding: 20px 24px 20px;
     overflow-y: auto;
     -webkit-overflow-scrolling: touch;
   }
@@ -398,22 +416,9 @@
     margin-bottom: 6px;
   }
 
-  .card-day {
-    font-size: 13px;
-    color: #555;
-    font-weight: 500;
-  }
-
-  .card-time {
-    font-size: 13px;
-    color: #888;
-  }
-
-  .card-type {
-    font-size: 12px;
-    color: #666;
-    margin-top: 2px;
-  }
+  .card-day { font-size: 13px; color: #555; font-weight: 500; }
+  .card-time { font-size: 13px; color: #888; }
+  .card-type { font-size: 12px; color: #666; margin-top: 2px; }
 
   .card-details-btn {
     display: inline-flex;
@@ -437,8 +442,8 @@
     .filter-group { min-width: 100%; }
     .filter-actions { width: 100%; }
     .filter-actions .btn { flex: 1; }
-    .quick-filters { gap: 8px; }
-    .quick-btn { min-width: 0; padding: 10px 14px; font-size: 13px; }
+    .quick-filters { flex-direction: column; gap: 8px; }
+    .quick-btn { min-width: 0; padding: 12px 16px; font-size: 14px; }
     .results-bar { flex-direction: column; align-items: flex-start; gap: 6px; }
     .table-wrap { display: none; }
     .mobile-cards { display: block; }
@@ -446,7 +451,8 @@
     .modal { border-radius: 10px; max-width: 100%; max-height: 90vh; }
     .modal-header { padding: 16px 18px 12px; position: sticky; top: 0; background: #fff; z-index: 1; border-radius: 10px 10px 0 0; }
     .modal-header h2 { font-size: 17px; }
-    .modal-body { padding: 16px 18px 20px; overflow-y: auto; }
+    .modal-body { padding: 16px 18px 16px; overflow-y: auto; }
+    .modal-footer { padding: 12px 18px; }
   }
 </style>
 </head>
@@ -465,15 +471,15 @@
     <div class="filter-row">
       <div class="filter-group">
         <label>Town</label>
-        <select id="filterTown"><option value="">All Towns</option></select>
+        <select id="filterTown" multiple size="1"><option value="">All Towns</option></select>
       </div>
       <div class="filter-group">
         <label>Fellowship</label>
-        <select id="filterFellowship"><option value="">All Fellowships</option></select>
+        <select id="filterFellowship" multiple size="1"><option value="">All Fellowships</option></select>
       </div>
       <div class="filter-group">
         <label>Day of Week</label>
-        <select id="filterDay"><option value="">All Days</option></select>
+        <select id="filterDay" multiple size="1"><option value="">All Days</option></select>
       </div>
       <div class="filter-actions">
         <button class="btn btn-primary" onclick="applyFilters()">Apply Filters</button>
@@ -529,6 +535,9 @@
       <button class="modal-close" onclick="closeModal()">&times;</button>
     </div>
     <div class="modal-body" id="modalBody"></div>
+    <div class="modal-footer">
+      <button class="modal-close-btn" onclick="closeModal()">Close</button>
+    </div>
   </div>
 </div>
 
@@ -646,15 +655,24 @@ function fillSelect(id, items, placeholder) {
     items.map(i => `<option value="${esc(i)}">${esc(i)}</option>`).join('');
 }
 
+function getSelectedValues(selectId) {
+  const sel = document.getElementById(selectId);
+  const values = [];
+  for (const opt of sel.selectedOptions) {
+    if (opt.value) values.push(opt.value);
+  }
+  return values;
+}
+
 function applyFilters() {
-  const town = document.getElementById('filterTown').value;
-  const fellowship = document.getElementById('filterFellowship').value;
-  const day = document.getElementById('filterDay').value;
+  const towns = getSelectedValues('filterTown');
+  const fellowships = getSelectedValues('filterFellowship');
+  const days = getSelectedValues('filterDay');
 
   filteredMeetings = allMeetings.filter(m => {
-    if (town && !m.town.toLowerCase().includes(town.toLowerCase())) return false;
-    if (fellowship && m.fellowship !== fellowship) return false;
-    if (day && m.day !== day) return false;
+    if (towns.length && !towns.some(t => m.town.toLowerCase().includes(t.toLowerCase()))) return false;
+    if (fellowships.length && !fellowships.includes(m.fellowship)) return false;
+    if (days.length && !days.includes(m.day)) return false;
     return true;
   });
 
@@ -662,9 +680,11 @@ function applyFilters() {
 }
 
 function clearFilters() {
-  document.getElementById('filterTown').value = '';
-  document.getElementById('filterFellowship').value = '';
-  document.getElementById('filterDay').value = '';
+  ['filterTown', 'filterFellowship', 'filterDay'].forEach(id => {
+    const sel = document.getElementById(id);
+    for (const opt of sel.options) opt.selected = false;
+    sel.options[0].selected = true;
+  });
   document.querySelectorAll('.quick-btn').forEach(b => b.classList.remove('active'));
   filteredMeetings = [...allMeetings];
   sortAndRender();
@@ -685,7 +705,6 @@ function sortAndRender() {
     return 0;
   });
 
-  // Update header arrows
   document.querySelectorAll('thead th[data-sort]').forEach(th => {
     const base = th.dataset.sort === 'title' ? 'TITLE' :
                  th.dataset.sort === 'town' ? 'TOWN' :
@@ -812,11 +831,17 @@ document.querySelectorAll('.quick-btn').forEach(btn => {
     const isActive = btn.classList.contains('active');
     document.querySelectorAll('.quick-btn').forEach(b => b.classList.remove('active'));
 
-    if (isActive) {
-      document.getElementById('filterTown').value = '';
-    } else {
+    const townSel = document.getElementById('filterTown');
+    for (const opt of townSel.options) opt.selected = false;
+
+    if (!isActive) {
       btn.classList.add('active');
-      document.getElementById('filterTown').value = btn.dataset.town;
+      const town = btn.dataset.town;
+      for (const opt of townSel.options) {
+        if (opt.value.toLowerCase().includes(town.toLowerCase())) opt.selected = true;
+      }
+    } else {
+      townSel.options[0].selected = true;
     }
     applyFilters();
   });
