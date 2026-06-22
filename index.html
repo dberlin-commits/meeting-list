@@ -278,21 +278,26 @@
     background: rgba(0,0,0,0.45);
     z-index: 1000;
     justify-content: center;
-    align-items: center;
+    align-items: flex-start;
     padding: 20px;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
   }
 
   .modal-overlay.open { display: flex; }
+
+  body.modal-open { overflow: hidden; }
 
   .modal {
     background: #fff;
     border-radius: 12px;
     max-width: 540px;
     width: 100%;
-    max-height: 85vh;
-    overflow-y: auto;
+    margin: auto;
     box-shadow: 0 20px 60px rgba(0,0,0,0.2);
     animation: modalIn 0.2s ease;
+    display: flex;
+    flex-direction: column;
   }
 
   @keyframes modalIn {
@@ -306,6 +311,7 @@
     display: flex;
     justify-content: space-between;
     align-items: flex-start;
+    flex-shrink: 0;
   }
 
   .modal-header h2 { font-size: 19px; color: #1a1a1a; padding-right: 16px; line-height: 1.3; }
@@ -320,16 +326,21 @@
     padding: 2px 6px;
     border-radius: 4px;
     transition: background 0.15s;
+    flex-shrink: 0;
   }
 
   .modal-close:hover { background: #f3f4f6; color: #333; }
 
-  .modal-body { padding: 20px 24px 26px; }
+  .modal-body {
+    padding: 20px 24px 26px;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+  }
 
   .modal-field { margin-bottom: 16px; }
   .modal-field:last-child { margin-bottom: 0; }
   .modal-label { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; color: #999; margin-bottom: 4px; }
-  .modal-value { font-size: 15px; color: #333; line-height: 1.5; }
+  .modal-value { font-size: 15px; color: #333; line-height: 1.5; word-break: break-word; }
   .modal-value a { color: #1a3a6b; text-decoration: none; font-weight: 500; }
   .modal-value a:hover { text-decoration: underline; }
 
@@ -427,10 +438,11 @@
     .results-bar { flex-direction: column; align-items: flex-start; gap: 6px; }
     .table-wrap { display: none; }
     .mobile-cards { display: block; }
-    .modal { margin: 8px; border-radius: 10px; }
-    .modal-header { padding: 16px 18px 12px; }
+    .modal-overlay { padding: 0; align-items: stretch; }
+    .modal { border-radius: 0; max-width: 100%; max-height: 100%; margin: 0; min-height: 100vh; }
+    .modal-header { padding: 16px 18px 12px; position: sticky; top: 0; background: #fff; z-index: 1; }
     .modal-header h2 { font-size: 17px; }
-    .modal-body { padding: 16px 18px 20px; }
+    .modal-body { padding: 16px 18px 20px; flex: 1; }
   }
 </style>
 </head>
@@ -774,10 +786,13 @@ function openModal(index) {
 
   document.getElementById('modalBody').innerHTML = html;
   document.getElementById('modalOverlay').classList.add('open');
+  document.body.classList.add('modal-open');
+  document.getElementById('modalOverlay').scrollTop = 0;
 }
 
 function closeModal() {
   document.getElementById('modalOverlay').classList.remove('open');
+  document.body.classList.remove('modal-open');
 }
 
 function esc(str) {
