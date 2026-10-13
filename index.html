@@ -543,7 +543,8 @@
 
 <script>
 const SHEET_ID = '1y8RXDyQPivRd9asvYtItHU-bx4Q7aIefP5it7hU0R8Q';
-const SHEET_URL = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq`;
+// Raw CSV export: gviz coerced each column to one type and dropped values like "Sunset" in the Time column
+const SHEET_URL = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/export?format=csv`;
 
 let allMeetings = [];
 let filteredMeetings = [];
@@ -586,16 +587,31 @@ const FELLOWSHIP_CLASSES = {
   'aa / na': 'fell-aa',
 };
 
-function handleSheetData(json) {
+function parseCSV(text) {
+  const rows = [];
+  let row = [], field = '', inQuotes = false;
+  for (let i = 0; i < text.length; i++) {
+    const ch = text[i];
+    if (inQuotes) {
+      if (ch === '"' && text[i + 1] === '"') { field += '"'; i++; }
+      else if (ch === '"') inQuotes = false;
+      else field += ch;
+    } else if (ch === '"') inQuotes = true;
+    else if (ch === ',') { row.push(field); field = ''; }
+    else if (ch === '\n' || ch === '\r') {
+      if (ch === '\r' && text[i + 1] === '\n') i++;
+      row.push(field); rows.push(row); row = []; field = '';
+    } else field += ch;
+  }
+  if (field || row.length) { row.push(field); rows.push(row); }
+  return rows;
+}
+
+function handleSheetData(csvText) {
   try {
-    allMeetings = json.table.rows.map(row => {
-      const c = row.c || [];
-      const val = i => {
-        if (!c[i]) return '';
-        if (c[i].f) return String(c[i].f).trim();
-        if (c[i].v != null) return String(c[i].v).trim();
-        return '';
-      };
+    // Row 1 is the header; rows without a fellowship (e.g. the "Israel Meetings" label row) are section labels
+    allMeetings = parseCSV(csvText).slice(1).filter(c => (c[2] || '').trim()).map(c => {
+      const val = i => (c[i] || '').trim();
       return {
         title: val(0),
         town: val(1),
@@ -624,18 +640,14 @@ function handleSheetData(json) {
 }
 
 function loadMeetings() {
-  window.google = window.google || {};
-  window.google.visualization = window.google.visualization || {};
-  window.google.visualization.Query = window.google.visualization.Query || {};
-  window.google.visualization.Query.setResponse = handleSheetData;
-
-  const script = document.createElement('script');
-  script.src = SHEET_URL;
-  script.onerror = function() {
-    document.getElementById('loading').innerHTML =
-      '<div style="color:#c00">Failed to load meetings. Please refresh or try again later.</div>';
-  };
-  document.head.appendChild(script);
+  fetch(SHEET_URL, { cache: 'no-store' })
+    .then(r => { if (!r.ok) throw new Error('HTTP ' + r.status); return r.text(); })
+    .then(handleSheetData)
+    .catch(err => {
+      console.error('Sheet load error:', err);
+      document.getElementById('loading').innerHTML =
+        '<div style="color:#c00">Failed to load meetings. Please refresh or try again later.</div>';
+    });
 }
 
 function populateDropdowns() {
